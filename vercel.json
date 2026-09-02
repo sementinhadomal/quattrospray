@@ -1,13 +1,4 @@
 {
   "cleanUrls": true,
-  "rewrites": [
-    {
-      "source": "/quiz",
-      "destination": "/quiz.html"
-    },
-    {
-      "source": "/assets/:path*",
-      "destination": "/js/:path*"
-    }
-  ]
+  "trailingSlash": false
 }
