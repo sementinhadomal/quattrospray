@@ -1,0 +1,177 @@
+const APPMAX_TOKEN = process.env.APPMAX_API_KEY || '867671B2-8DA3267A-01EDA295-14DBCC7E';
+
+const PACK_PRICES = {
+  1: 177.90,
+  2: 297.90,
+  3: 397.90
+};
+
+const PACK_NAMES = {
+  1: '1x Quattro Spray',
+  2: '2x Quattro Spray',
+  3: '3x Quattro Spray'
+};
+
+function sendJson(res, statusCode, body) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (typeof res.status === 'function') {
+    return res.status(statusCode).json(body);
+  }
+  res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(body));
+}
+
+export default async function handler(req, res) {
+  if (req.method === 'OPTIONS') {
+    return sendJson(res, 200, { ok: true });
+  }
+
+  if (req.method !== 'POST') {
+    return sendJson(res, 405, { ok: false, error: 'Method not allowed' });
+  }
+
+  try {
+    const payload = req.body || {};
+    const data = payload.data || payload;
+    const { action, quantity = 1, cpf, card, contact, address } = data;
+
+    // Clean CPF/phone
+    const cleanCpf = (cpf || card?.document_number || '18521413793').replace(/\D/g, '');
+    const cleanPhone = (contact?.phone || '11999999999').replace(/\D/g, '');
+    const name = contact?.name || card?.holder || 'Cliente Quattro';
+    const nameParts = name.trim().split(/\s+/);
+    const firstname = nameParts[0] || 'Cliente';
+    const lastname = nameParts.slice(1).join(' ') || 'Quattro';
+    const email = contact?.email || 'cliente@quattrospray.com';
+
+    // 1. Create Customer in Appmax
+    const customerRes = await fetch('https://admin.appmax.com.br/api/v3/customer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        'access-token': APPMAX_TOKEN,
+        firstname,
+        lastname,
+        email,
+        telephone: cleanPhone,
+        postcode: (address?.cep || '01001000').replace(/\D/g, ''),
+        address: address?.street || 'Rua Principal',
+        number: address?.number || '100',
+        district: address?.district || 'Centro',
+        city: address?.city || 'São Paulo',
+        state: address?.state || 'SP'
+      })
+    });
+
+    const customerData = await customerRes.json();
+    if (!customerData.success || !customerData.data?.id) {
+      return sendJson(res, 400, { ok: false, error: customerData.text || 'Erro ao cadastrar cliente na Appmax' });
+    }
+
+    const customerId = customerData.data.id;
+    const price = PACK_PRICES[quantity] || PACK_PRICES[1];
+    const packName = PACK_NAMES[quantity] || PACK_NAMES[1];
+
+    // 2. Create Order in Appmax
+    const orderRes = await fetch('https://admin.appmax.com.br/api/v3/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        'access-token': APPMAX_TOKEN,
+        customer_id: customerId,
+        products: [
+          {
+            sku: `QTR-${quantity}X`,
+            name: packName,
+            qty: 1,
+            price: price
+          }
+        ]
+      })
+    });
+
+    const orderData = await orderRes.json();
+    if (!orderData.success || !orderData.data?.id) {
+      return sendJson(res, 400, { ok: false, error: orderData.text || 'Erro ao criar pedido na Appmax' });
+    }
+
+    const orderId = orderData.data.id;
+
+    // 3. Process Payment (PIX or Credit Card)
+    if (action === 'pix' || !card) {
+      const pixRes = await fetch('https://admin.appmax.com.br/api/v3/payment/pix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          'access-token': APPMAX_TOKEN,
+          cart: { order_id: orderId },
+          customer: { customer_id: customerId },
+          payment: {
+            pix: { document_number: cleanCpf }
+          }
+        })
+      });
+
+      const pixData = await pixRes.json();
+      if (!pixData.success || !pixData.data) {
+        return sendJson(res, 400, { ok: false, error: pixData.text || 'Erro ao gerar PIX na Appmax' });
+      }
+
+      return sendJson(res, 200, {
+        ok: true,
+        success: true,
+        orderId: orderId,
+        customerId: customerId,
+        pix_emv: pixData.data.pix_emv,
+        pix_qrcode: pixData.data.pix_emv,
+        pix_expiration_date: pixData.data.pix_expiration_date
+      });
+    } else {
+      // Credit Card Payment
+      const [expMonth, expYearRaw] = (card.expiry || '12/2028').split('/');
+      let expYear = (expYearRaw || '28').trim();
+      if (expYear.length === 2) expYear = '20' + expYear;
+
+      const cardRes = await fetch('https://admin.appmax.com.br/api/v3/payment/credit-card', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          'access-token': APPMAX_TOKEN,
+          cart: { order_id: orderId },
+          customer: { customer_id: customerId },
+          payment: {
+            CreditCard: {
+              number: (card.number || '').replace(/\D/g, ''),
+              cvv: (card.cvv || '').trim(),
+              month: (expMonth || '12').trim(),
+              year: expYear,
+              name: card.holder || name,
+              document_number: cleanCpf,
+              installments: parseInt(data.installments || 1, 10)
+            }
+          }
+        })
+      });
+
+      const cardData = await cardRes.json();
+      if (!cardData.success) {
+        const errorMsg = cardData.text || cardData.data?.message || 'Cartão recusado. Confira os dados ou tente outro cartão.';
+        return sendJson(res, 400, { ok: false, error: errorMsg, reason: errorMsg });
+      }
+
+      return sendJson(res, 200, {
+        ok: true,
+        success: true,
+        orderId: orderId,
+        customerId: customerId,
+        status: cardData.data?.status || 'aprovado'
+      });
+    }
+  } catch (err) {
+    console.error('Appmax Handler Error:', err);
+    return sendJson(res, 500, { ok: false, error: err.message });
+  }
+}
