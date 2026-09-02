@@ -1,0 +1,1 @@
+import{t as e}from"./createClientRpc-B2eiH2Vw.js";import{t}from"./createServerFn-XrUIxX8_.js";function n(e){return`https://www.quattro-spray.com/pagamento?l=${e}&utm_source=rec`}var r=t({method:`POST`}).handler(e(`83e22ed038dff8c5737626b8a3bc6dfa0ae1d5fff3e8d4b841e982c1e0cefce7`));export{r as n,n as t};
