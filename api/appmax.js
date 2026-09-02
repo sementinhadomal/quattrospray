@@ -69,6 +69,16 @@ export default async function handler(req, res) {
     const lastname = nameParts.slice(1).join(' ') || 'Quattro';
     const email = contact?.email || 'cliente@quattrospray.com';
 
+    // Calculate shipping/freight cost
+    let shippingAmount = 0;
+    if (typeof data.shippingCents === 'number') {
+      shippingAmount = data.shippingCents / 100;
+    } else if (typeof data.shipping === 'number') {
+      shippingAmount = data.shipping;
+    } else if (typeof data.shippingCents === 'string') {
+      shippingAmount = parseFloat(data.shippingCents) / 100;
+    }
+
     // 1. Create Customer in Appmax
     const customerRes = await fetch('https://admin.appmax.com.br/api/v3/customer', {
       method: 'POST',
@@ -97,13 +107,14 @@ export default async function handler(req, res) {
     const price = PACK_PRICES[quantity] || PACK_PRICES[1];
     const packName = PACK_NAMES[quantity] || PACK_NAMES[1];
 
-    // 2. Create Order in Appmax
+    // 2. Create Order in Appmax (including shipping cost)
     const orderRes = await fetch('https://admin.appmax.com.br/api/v3/order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         'access-token': APPMAX_TOKEN,
         customer_id: customerId,
+        shipping: shippingAmount,
         products: [
           {
             sku: `QTR-${quantity}X`,
