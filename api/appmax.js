@@ -70,14 +70,15 @@ export default async function handler(req, res) {
     const email = contact?.email || 'cliente@quattrospray.com';
 
     // Calculate shipping/freight cost
-    let shippingAmount = 0;
+    let rawShipping = 0;
     if (typeof data.shippingCents === 'number') {
-      shippingAmount = data.shippingCents / 100;
+      rawShipping = data.shippingCents / 100;
     } else if (typeof data.shipping === 'number') {
-      shippingAmount = data.shipping;
+      rawShipping = data.shipping;
     } else if (typeof data.shippingCents === 'string') {
-      shippingAmount = parseFloat(data.shippingCents) / 100;
+      rawShipping = parseFloat(data.shippingCents) / 100;
     }
+    const shippingAmount = Math.round(rawShipping * 100) / 100;
 
     // 1. Create Customer in Appmax
     const customerRes = await fetch('https://admin.appmax.com.br/api/v3/customer', {
@@ -104,7 +105,7 @@ export default async function handler(req, res) {
     }
 
     const customerId = customerData.data.id;
-    const price = PACK_PRICES[quantity] || PACK_PRICES[1];
+    const price = Math.round((PACK_PRICES[quantity] || PACK_PRICES[1]) * 100) / 100;
     const packName = PACK_NAMES[quantity] || PACK_NAMES[1];
 
     // 2. Create Order in Appmax (including shipping cost)
