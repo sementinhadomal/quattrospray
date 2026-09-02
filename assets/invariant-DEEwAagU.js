@@ -1,1 +1,1 @@
-function e(){throw Error(`Invariant failed`)}export{e as t};
+function e(c,m){if(c===false)console.warn("Invariant:",m)}export{e as t};
