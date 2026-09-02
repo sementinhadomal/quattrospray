@@ -120,13 +120,29 @@ export default async function handler(req, res) {
         return sendJson(res, 400, { ok: false, error: pixData.text || 'Erro ao gerar PIX na Appmax' });
       }
 
+      const pixEmv = pixData.data.pix_emv || '';
+      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(pixEmv)}`;
+
+      let base64Qr = '';
+      try {
+        const qrRes = await fetch(qrApiUrl);
+        if (qrRes.status === 200) {
+          const buf = Buffer.from(await qrRes.arrayBuffer());
+          base64Qr = buf.toString('base64');
+        }
+      } catch (errQr) {
+        console.error('QR code fetch error:', errQr);
+      }
+
       return sendJson(res, 200, {
         ok: true,
         success: true,
         orderId: orderId,
         customerId: customerId,
-        pix_emv: pixData.data.pix_emv,
-        pix_qrcode: pixData.data.pix_emv,
+        copyPaste: pixEmv,
+        pix_emv: pixEmv,
+        qrCodeUrl: qrApiUrl,
+        qrCodeBase64: base64Qr,
         pix_expiration_date: pixData.data.pix_expiration_date
       });
     } else {
