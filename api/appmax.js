@@ -69,6 +69,15 @@ export default async function handler(req, res) {
     const lastname = nameParts.slice(1).join(' ') || 'Quattro';
     const email = contact?.email || 'cliente@quattrospray.com';
 
+    // Extract complete address fields
+    const street = address?.street || address?.address || address?.logradouro || 'Rua Principal';
+    const number = address?.number || address?.numero || '100';
+    const complement = address?.complement || address?.complemento || '';
+    const district = address?.district || address?.bairro || 'Centro';
+    const city = address?.city || address?.cidade || 'São Paulo';
+    const state = (address?.state || address?.uf || 'SP').toUpperCase();
+    const cep = (address?.zip || address?.cep || address?.postcode || '01001000').replace(/\D/g, '');
+
     // Calculate shipping/freight cost
     let rawShipping = 0;
     if (typeof data.shippingCents === 'number') {
@@ -80,7 +89,7 @@ export default async function handler(req, res) {
     }
     const shippingAmount = Math.round(rawShipping * 100) / 100;
 
-    // 1. Create Customer in Appmax
+    // 1. Create Customer in Appmax with all address fields
     const customerRes = await fetch('https://admin.appmax.com.br/api/v3/customer', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -90,12 +99,18 @@ export default async function handler(req, res) {
         lastname,
         email,
         telephone: cleanPhone,
-        postcode: (address?.cep || '01001000').replace(/\D/g, ''),
-        address: address?.street || 'Rua Principal',
-        number: address?.number || '100',
-        district: address?.district || 'Centro',
-        city: address?.city || 'São Paulo',
-        state: address?.state || 'SP'
+        postcode: cep,
+        address_street: street,
+        address_street_number: number,
+        address_street_complement: complement,
+        address_street_district: district,
+        address_city: city,
+        address_state: state,
+        address: street,
+        number: number,
+        district: district,
+        city: city,
+        state: state
       })
     });
 
