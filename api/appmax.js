@@ -29,14 +29,36 @@ export default async function handler(req, res) {
     return sendJson(res, 200, { ok: true });
   }
 
-  if (req.method !== 'POST') {
+  if (req.method !== 'POST' && req.method !== 'GET') {
     return sendJson(res, 405, { ok: false, error: 'Method not allowed' });
   }
 
   try {
     const payload = req.body || {};
     const data = payload.data || payload;
-    const { action, quantity = 1, cpf, card, contact, address } = data;
+    const { action, quantity = 1, cpf, card, contact, address, orderId: checkOrderId } = data;
+
+    // Handle status check
+    if (action === 'status') {
+      if (checkOrderId) {
+        try {
+          const statusRes = await fetch(`https://admin.appmax.com.br/api/v3/order/${checkOrderId}?access-token=${APPMAX_TOKEN}`);
+          const statusData = await statusRes.json();
+          if (statusData.success && statusData.data) {
+            const st = (statusData.data.status || '').toLowerCase();
+            const isPaid = st === 'paid' || st === 'aprovado' || st === 'approved' || st === 'integralizado';
+            return sendJson(res, 200, {
+              ok: true,
+              state: isPaid ? 'paid' : 'pending',
+              status: statusData.data.status
+            });
+          }
+        } catch (eStatus) {
+          console.error('Status check error:', eStatus);
+        }
+      }
+      return sendJson(res, 200, { ok: true, state: 'pending' });
+    }
 
     // Clean CPF/phone
     const cleanCpf = (cpf || card?.document_number || '18521413793').replace(/\D/g, '');
@@ -99,6 +121,7 @@ export default async function handler(req, res) {
     }
 
     const orderId = orderData.data.id;
+    const expiresAtIso = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
     // 3. Process Payment (PIX or Credit Card)
     if (action === 'pix' || !card) {
@@ -134,6 +157,10 @@ export default async function handler(req, res) {
         console.error('QR code fetch error:', errQr);
       }
 
+      const expDate = pixData.data.pix_expiration_date 
+        ? new Date(pixData.data.pix_expiration_date.replace(' ', 'T')).toISOString()
+        : expiresAtIso;
+
       return sendJson(res, 200, {
         ok: true,
         success: true,
@@ -143,7 +170,8 @@ export default async function handler(req, res) {
         pix_emv: pixEmv,
         qrCodeUrl: qrApiUrl,
         qrCodeBase64: base64Qr,
-        pix_expiration_date: pixData.data.pix_expiration_date
+        expiresAt: expDate,
+        pix_expiration_date: pixData.data.pix_expiration_date || expDate
       });
     } else {
       // Credit Card Payment
