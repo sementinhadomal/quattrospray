@@ -36,7 +36,9 @@ export default async function handler(req, res) {
   try {
     const payload = req.body || {};
     const data = payload.data || payload;
-    const { action, quantity = 1, cpf, card, contact, address, orderId: checkOrderId } = data;
+    const { action, quantity = 1, cpf, card, contact, address, orderId: checkOrderId, isV2, version } = data;
+
+    const isVersion2 = Boolean(isV2 || version === 'v2' || data.v2);
 
     // Handle status check
     if (action === 'status') {
@@ -63,11 +65,20 @@ export default async function handler(req, res) {
     // Clean CPF/phone
     const cleanCpf = (cpf || card?.document_number || '18521413793').replace(/\D/g, '');
     const cleanPhone = (contact?.phone || '11999999999').replace(/\D/g, '');
-    const name = contact?.name || card?.holder || 'Cliente Quattro';
+
+    const defaultName = isVersion2 ? 'Cliente Quattro v2' : 'Cliente Quattro';
+    const name = contact?.name || card?.holder || defaultName;
     const nameParts = name.trim().split(/\s+/);
     const firstname = nameParts[0] || 'Cliente';
-    const lastname = nameParts.slice(1).join(' ') || 'Quattro';
-    const email = contact?.email || 'cliente@quattrospray.com';
+
+    let lastname = nameParts.slice(1).join(' ');
+    if (!lastname) {
+      lastname = isVersion2 ? 'Quattro v2' : 'Quattro';
+    } else if (isVersion2 && !lastname.toLowerCase().includes('v2')) {
+      lastname = lastname + ' v2';
+    }
+
+    const email = contact?.email || (isVersion2 ? 'cliente.v2@quattrospray.com' : 'cliente@quattrospray.com');
 
     // Extract complete address fields
     const street = address?.street || address?.address || address?.logradouro || 'Rua Principal';
@@ -89,7 +100,7 @@ export default async function handler(req, res) {
     }
     const shippingAmount = Math.round(rawShipping * 100) / 100;
 
-    // 1. Create Customer in Appmax with all address fields
+    // 1. Create Customer in Appmax with all address fields and V2 identification
     const customerRes = await fetch('https://admin.appmax.com.br/api/v3/customer', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -121,9 +132,11 @@ export default async function handler(req, res) {
 
     const customerId = customerData.data.id;
     const price = Math.round((PACK_PRICES[quantity] || PACK_PRICES[1]) * 100) / 100;
-    const packName = PACK_NAMES[quantity] || PACK_NAMES[1];
+    const basePackName = PACK_NAMES[quantity] || PACK_NAMES[1];
+    const packName = isVersion2 ? `${basePackName} (v2)` : basePackName;
+    const packSku = isVersion2 ? `QTR-${quantity}X-V2` : `QTR-${quantity}X`;
 
-    // 2. Create Order in Appmax (including shipping cost)
+    // 2. Create Order in Appmax (including shipping cost and V2 tagging)
     const orderRes = await fetch('https://admin.appmax.com.br/api/v3/order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -133,7 +146,7 @@ export default async function handler(req, res) {
         shipping: shippingAmount,
         products: [
           {
-            sku: `QTR-${quantity}X`,
+            sku: packSku,
             name: packName,
             qty: 1,
             price: price
