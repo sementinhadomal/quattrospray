@@ -75,121 +75,24 @@ fbq('track', 'PageView');
   if (document.readyState==='complete') schedule(); else window.addEventListener('load', schedule, { once: true });
 })();
 </script><script defer="" src="/js/~flock.js" data-proxy-url="/~api/analytics"></script><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2140659066532768&ev=PageView&noscript=1"/></noscript>
-<style>/* Hide all WebKit/iOS Safari native video play buttons & overlays */
-video::-webkit-media-controls,
-video::-webkit-media-controls-start-playback-button,
-video::-webkit-media-controls-play-button,
-video::-webkit-media-controls-panel,
-video::-webkit-media-controls-overlay-play-button,
-video::-webkit-media-controls-enclosure,
-video::-webkit-media-controls-container,
-video::-webkit-media-controls-volume-slider,
-video::-webkit-media-controls-mute-button,
-video::-webkit-media-controls-timeline,
-video::-webkit-media-controls-current-time-display,
-video::-webkit-media-controls-time-remaining-display,
-*::-webkit-media-controls,
-*::-webkit-media-controls-start-playback-button,
-*::-webkit-media-controls-play-button,
-*::-webkit-media-controls-overlay-play-button,
-*::-webkit-media-controls-panel,
-*::-webkit-media-controls-container,
-*::-webkit-media-controls-enclosure {
-  display: none !important;
-  -webkit-appearance: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  width: 0px !important;
-  height: 0px !important;
-  max-width: 0px !important;
-  max-height: 0px !important;
-  margin: 0px !important;
-  padding: 0px !important;
-  border: none !important;
-  position: absolute !important;
-  top: -9999px !important;
-  left: -9999px !important;
-  transform: scale(0) !important;
-}
-
-video {
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: none !important;
-  -webkit-touch-callout: none !important;
-  -webkit-user-select: none !important;
-  user-select: none !important;
-}</style>
 </head><body><!--$--><!--/$--><script type="module" src="/js/index-V6vBjwUP.js"></script>
-
-
-
-
 <script>
 (function() {
-  function forceAutoplay(v) {
-    if (!v) return;
-    v.muted = true;
-    v.defaultMuted = true;
-    v.volume = 0;
-    v.autoplay = true;
-    v.loop = true;
-    v.playsInline = true;
-    v.controls = false;
-    v.removeAttribute('controls');
-    v.setAttribute('muted', '');
-    v.setAttribute('playsinline', '');
-    v.setAttribute('webkit-playsinline', '');
-    v.setAttribute('disablepictureinpicture', '');
-    v.setAttribute('disableremoteplayback', '');
-    v.setAttribute('x5-video-player-type', 'h5');
-    v.style.pointerEvents = 'none';
-
-    if (!v.src && v.querySelector('source')) {
-      var s = v.querySelector('source').getAttribute('src');
-      if (s) v.src = s;
-    }
-
-    if (v.paused) {
+  function forcePlay() {
+    document.querySelectorAll('video').forEach(function(v) {
+      v.muted = true;
+      v.defaultMuted = true;
+      v.playsInline = true;
+      v.setAttribute('playsinline', '');
+      v.setAttribute('webkit-playsinline', '');
+      v.style.pointerEvents = 'none';
       var p = v.play();
-      if (p && p.catch) {
-        p.catch(function() {
-          v.muted = true;
-          v.play().catch(function(){});
-        });
-      }
-    }
+      if (p && p.catch) p.catch(function(){});
+    });
   }
-
-  function initAllVideos() {
-    var videos = document.querySelectorAll('video');
-    for (var i = 0; i < videos.length; i++) {
-      forceAutoplay(videos[i]);
-    }
-  }
-
-  initAllVideos();
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAllVideos);
-  } else {
-    initAllVideos();
-  }
-  window.addEventListener('load', initAllVideos);
-
-  var gestureEvts = ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'mousedown', 'click', 'scroll', 'touchmove'];
-  for (var k = 0; k < gestureEvts.length; k++) {
-    window.addEventListener(gestureEvts[k], initAllVideos, { passive: true, capture: true });
-    document.addEventListener(gestureEvts[k], initAllVideos, { passive: true, capture: true });
-  }
-
-  setInterval(initAllVideos, 300);
-
-  try {
-    var obs = new MutationObserver(function() { initAllVideos(); });
-    obs.observe(document.documentElement, { childList: true, subtree: true });
-  } catch(e) {}
+  document.addEventListener('DOMContentLoaded', forcePlay);
+  window.addEventListener('load', forcePlay);
+  document.addEventListener('touchstart', forcePlay, { once: true });
 })();
 </script>
 
