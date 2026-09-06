@@ -38,7 +38,17 @@ export default async function handler(req, res) {
     const data = payload.data || payload;
     const { action, quantity = 1, cpf, card, contact, address, orderId: checkOrderId, isV2, version } = data;
 
-    const isVersion2 = Boolean(isV2 || version === 'v2' || data.v2);
+    const referer = req.headers.referer || req.headers.referrer || '';
+    const isVersion2 = Boolean(
+      isV2 ||
+      version === 'v2' ||
+      data.v2 ||
+      payload.isV2 ||
+      payload.version === 'v2' ||
+      /\/(1|quiz2)(\/|\?|$)/i.test(referer) ||
+      referer.includes('/1') ||
+      referer.includes('/quiz2')
+    );
 
     // Handle status check
     if (action === 'status') {
