@@ -9,24 +9,32 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #0a0c10;
-      --card-bg: #141820;
-      --card-border: #232936;
-      --text-main: #f1f5f9;
+      --bg-dark: #090b0e;
+      --panel-bg: #12161f;
+      --card-bg: #181d28;
+      --card-border: #262e3e;
+      --card-border-hover: #3b475e;
+      --text-main: #f8fafc;
       --text-muted: #94a3b8;
+      --text-dim: #64748b;
       --primary-gold: #eab308;
       --primary-gold-hover: #ca8a04;
       --accent-green: #22c55e;
+      --accent-green-bg: rgba(34, 197, 94, 0.15);
       --accent-blue: #3b82f6;
+      --accent-blue-bg: rgba(59, 130, 246, 0.15);
       --accent-purple: #a855f7;
       --accent-red: #ef4444;
+      --accent-red-bg: rgba(239, 68, 68, 0.15);
+      --wa-green: #25d366;
+      --wa-green-hover: #1da851;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     body {
@@ -35,6 +43,7 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      -webkit-font-smoothing: antialiased;
     }
 
     /* Auth Screen */
@@ -42,7 +51,7 @@
       position: fixed;
       inset: 0;
       background: rgba(5, 7, 10, 0.95);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(12px);
       z-index: 9999;
       display: flex;
       align-items: center;
@@ -53,36 +62,40 @@
     .auth-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 32px;
+      border-radius: 20px;
+      padding: 36px 28px;
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       text-align: center;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
     }
 
     .auth-card h2 {
       font-size: 24px;
+      font-weight: 800;
       margin-bottom: 8px;
       color: var(--primary-gold);
+      letter-spacing: -0.02em;
     }
 
     .auth-card p {
       color: var(--text-muted);
       font-size: 14px;
+      line-height: 1.5;
       margin-bottom: 24px;
     }
 
     .auth-input {
       width: 100%;
       padding: 14px 16px;
-      border-radius: 10px;
+      border-radius: 12px;
       border: 1px solid var(--card-border);
-      background: #0d1117;
+      background: #0b0e14;
       color: #fff;
       font-size: 16px;
       outline: none;
       margin-bottom: 16px;
+      transition: border-color 0.2s;
     }
     .auth-input:focus {
       border-color: var(--primary-gold);
@@ -92,31 +105,47 @@
       width: 100%;
       padding: 14px;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       background: var(--primary-gold);
       color: #000;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 16px;
       cursor: pointer;
       transition: all 0.2s;
     }
     .btn-submit:hover {
       background: var(--primary-gold-hover);
+      transform: translateY(-1px);
     }
 
-    /* Top Navigation */
+    /* Main Layout Frame */
+    #app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* Header */
     header {
-      background: #0f131a;
+      background: var(--panel-bg);
       border-bottom: 1px solid var(--card-border);
       padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
+      width: 100%;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
 
-    .brand {
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand-group {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -126,40 +155,45 @@
       background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
       color: #000;
       font-weight: 800;
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 8px;
       font-size: 14px;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.05em;
     }
 
     .brand-title {
       font-size: 18px;
-      font-weight: 700;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.01em;
     }
 
     .header-actions {
       display: flex;
-      gap: 12px;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .btn-export {
-      background: #166534;
-      color: #86efac;
+      background: #15803d;
+      color: #fff;
       border: 1px solid #22c55e;
       padding: 10px 18px;
-      border-radius: 8px;
+      border-radius: 10px;
       font-weight: 700;
       font-size: 14px;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 8px;
       transition: all 0.2s;
       text-decoration: none;
+      white-space: nowrap;
     }
     .btn-export:hover {
-      background: #22c55e;
-      color: #000;
+      background: #16a34a;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
     }
 
     .btn-logout {
@@ -167,40 +201,63 @@
       border: 1px solid var(--card-border);
       color: var(--text-muted);
       padding: 10px 16px;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
       font-weight: 600;
       font-size: 14px;
+      transition: all 0.2s;
     }
     .btn-logout:hover {
       color: #fff;
       border-color: #fff;
+      background: rgba(255,255,255,0.05);
     }
 
     /* Main Container */
     main {
-      padding: 24px;
+      padding: 24px 16px;
       max-width: 1400px;
       margin: 0 auto;
       width: 100%;
       flex: 1;
     }
 
+    @media (min-width: 768px) {
+      main {
+        padding: 28px 24px;
+      }
+    }
+
     /* Stats Grid */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
       margin-bottom: 24px;
+    }
+
+    @media (min-width: 900px) {
+      .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+      }
     }
 
     .stat-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 16px;
+      padding: 18px 20px;
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: border-color 0.2s;
+    }
+
+    .stat-card:hover {
+      border-color: var(--card-border-hover);
     }
 
     .stat-card::before {
@@ -208,8 +265,8 @@
       position: absolute;
       top: 0;
       left: 0;
-      width: 4px;
-      height: 100%;
+      width: 100%;
+      height: 4px;
     }
 
     .stat-card.total::before { background: var(--primary-gold); }
@@ -219,25 +276,27 @@
 
     .stat-title {
       color: var(--text-muted);
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 12px;
+      font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
       margin-bottom: 8px;
     }
 
     .stat-value {
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 800;
       color: #fff;
+      line-height: 1;
     }
 
-    /* Controls & Filters */
+    /* Controls Bar */
     .controls-bar {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 12px;
+      border-radius: 16px;
       padding: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
@@ -246,19 +305,20 @@
 
     .search-box {
       flex: 1;
-      min-width: 250px;
+      min-width: 260px;
       position: relative;
     }
 
     .search-input {
       width: 100%;
-      padding: 10px 14px 10px 38px;
-      border-radius: 8px;
+      padding: 12px 16px 12px 42px;
+      border-radius: 10px;
       border: 1px solid var(--card-border);
-      background: #0d1117;
+      background: #0b0e14;
       color: #fff;
       font-size: 14px;
       outline: none;
+      transition: border-color 0.2s;
     }
     .search-input:focus {
       border-color: var(--primary-gold);
@@ -266,44 +326,58 @@
 
     .search-icon {
       position: absolute;
-      left: 12px;
+      left: 14px;
       top: 50%;
       transform: translateY(-50%);
-      color: var(--text-muted);
+      color: var(--text-dim);
+      font-size: 15px;
     }
 
     .filter-select {
-      padding: 10px 14px;
-      border-radius: 8px;
+      padding: 12px 14px;
+      border-radius: 10px;
       border: 1px solid var(--card-border);
-      background: #0d1117;
+      background: #0b0e14;
       color: #fff;
       font-size: 14px;
       outline: none;
       cursor: pointer;
+      min-width: 150px;
+    }
+    .filter-select:focus {
+      border-color: var(--primary-gold);
     }
 
     .btn-refresh {
       background: #1e293b;
       color: #fff;
       border: 1px solid var(--card-border);
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-weight: 600;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 700;
       font-size: 14px;
       cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
     }
     .btn-refresh:hover {
       background: #334155;
     }
 
-    /* Table */
+    /* Desktop Data Table */
     .table-container {
+      display: none;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 12px;
-      overflow-x: auto;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    @media (min-width: 860px) {
+      .table-container {
+        display: block;
+      }
     }
 
     table {
@@ -314,93 +388,204 @@
     }
 
     th {
-      background: #0f131a;
-      padding: 14px 16px;
+      background: #0d1017;
+      padding: 16px;
       color: var(--text-muted);
       font-weight: 700;
-      font-size: 12px;
+      font-size: 11px;
       text-transform: uppercase;
+      letter-spacing: 0.06em;
       border-bottom: 1px solid var(--card-border);
     }
 
     td {
-      padding: 14px 16px;
-      border-bottom: 1px solid #1a202c;
+      padding: 16px;
+      border-bottom: 1px solid #1a2130;
       vertical-align: middle;
     }
 
+    tr:last-child td {
+      border-bottom: none;
+    }
+
     tr:hover td {
-      background: #1a202e;
+      background: rgba(255,255,255,0.02);
     }
 
     .lead-name {
       font-weight: 700;
       color: #fff;
+      font-size: 15px;
       display: block;
+      margin-bottom: 2px;
     }
     .lead-meta {
       font-size: 12px;
       color: var(--text-muted);
     }
 
-    /* WhatsApp Button */
-    .btn-wa {
+    /* WhatsApp Button Desktop */
+    .btn-wa-desktop {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background: #25d366;
+      justify-content: center;
+      gap: 8px;
+      background: var(--wa-green);
       color: #000;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 13px;
-      padding: 8px 14px;
-      border-radius: 20px;
+      padding: 9px 16px;
+      border-radius: 10px;
       text-decoration: none;
-      transition: transform 0.2s;
+      white-space: nowrap;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(37, 211, 102, 0.25);
     }
-    .btn-wa:hover {
-      transform: scale(1.05);
-      background: #20ba5a;
+    .btn-wa-desktop:hover {
+      background: var(--wa-green-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.4);
     }
 
     /* Badges */
     .badge {
       display: inline-block;
-      padding: 4px 10px;
-      border-radius: 6px;
+      padding: 5px 12px;
+      border-radius: 8px;
       font-size: 12px;
       font-weight: 700;
+      white-space: nowrap;
     }
-    .badge-incompleto { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
-    .badge-pix { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); }
-    .badge-cartao { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
+    .badge-incompleto { background: var(--accent-red-bg); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .badge-pix { background: var(--accent-blue-bg); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); }
+    .badge-cartao { background: var(--accent-green-bg); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
 
     .badge-version {
-      background: #1e293b;
+      display: inline-block;
+      background: #0f172a;
       color: var(--primary-gold);
       border: 1px solid var(--primary-gold);
       padding: 2px 8px;
-      border-radius: 4px;
+      border-radius: 6px;
       font-size: 11px;
       font-weight: 800;
+      margin-top: 4px;
     }
 
     .btn-delete {
       background: transparent;
       border: none;
-      color: #ef4444;
+      color: var(--text-dim);
       cursor: pointer;
-      font-size: 16px;
-      opacity: 0.7;
-      padding: 4px 8px;
+      font-size: 18px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: all 0.2s;
     }
     .btn-delete:hover {
-      opacity: 1;
+      color: var(--accent-red);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Mobile Cards Container */
+    .mobile-cards-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    @media (min-width: 860px) {
+      .mobile-cards-container {
+        display: none;
+      }
+    }
+
+    .mobile-lead-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    .mobile-lead-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .mobile-lead-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .mobile-lead-date {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .mobile-lead-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+      background: #0d1017;
+      padding: 12px;
+      border-radius: 10px;
+    }
+
+    .mobile-lead-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mobile-lead-label {
+      color: var(--text-dim);
+      font-size: 12px;
+
+    }
+
+    .mobile-lead-val {
+      font-weight: 600;
+      color: #e2e8f0;
+      text-align: right;
+    }
+
+    /* WhatsApp Button Mobile */
+    .btn-wa-mobile {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--wa-green);
+      color: #000;
+      font-weight: 800;
+      font-size: 14px;
+      padding: 13px;
+      border-radius: 12px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+      transition: all 0.2s;
+    }
+    .btn-wa-mobile:active {
+      transform: scale(0.98);
+      background: var(--wa-green-hover);
     }
 
     .empty-state {
-      padding: 48px;
+      padding: 48px 24px;
       text-align: center;
       color: var(--text-muted);
+      font-size: 15px;
     }
   </style>
 </head>
@@ -422,15 +607,17 @@
   <!-- Dashboard App -->
   <div id="app" style="display: none;">
     <header>
-      <div class="brand">
-        <span class="brand-badge">QUATTRO</span>
-        <span class="brand-title">Painel de Leads & Remarketing</span>
-      </div>
-      <div class="header-actions">
-        <a id="btnDownloadCsv" href="#" onclick="downloadCsv(event)" class="btn-export">
-          📥 Baixar CSV para Remarketing
-        </a>
-        <button onclick="logout()" class="btn-logout">Sair</button>
+      <div class="header-container">
+        <div class="brand-group">
+          <span class="brand-badge">QUATTRO</span>
+          <span class="brand-title">Painel de Leads & Remarketing</span>
+        </div>
+        <div class="header-actions">
+          <a id="btnDownloadCsv" href="#" onclick="downloadCsv(event)" class="btn-export">
+            📥 Baixar CSV
+          </a>
+          <button onclick="logout()" class="btn-logout">Sair</button>
+        </div>
       </div>
     </header>
 
@@ -438,11 +625,11 @@
       <!-- Stats Grid -->
       <div class="stats-grid">
         <div class="stat-card total">
-          <div class="stat-title">Total de Leads Capturados</div>
+          <div class="stat-title">Total Capturados</div>
           <div class="stat-value" id="statTotal">0</div>
         </div>
         <div class="stat-card incompleto">
-          <div class="stat-title">Checkout Incompleto (Abandonos)</div>
+          <div class="stat-title">Abandonos (Incompletos)</div>
           <div class="stat-value" id="statIncompleto">0</div>
         </div>
         <div class="stat-card pix">
@@ -455,41 +642,41 @@
         </div>
       </div>
 
-      <!-- Controls -->
+      <!-- Controls & Search -->
       <div class="controls-bar">
         <div class="search-box">
           <span class="search-icon">🔍</span>
-          <input type="text" id="searchInput" class="search-input" placeholder="Buscar por Nome, Email, WhatsApp ou CPF..." oninput="renderTable()">
+          <input type="text" id="searchInput" class="search-input" placeholder="Buscar Nome, Email, WhatsApp ou CPF..." oninput="renderAll()">
         </div>
 
-        <select id="filterStatus" class="filter-select" onchange="renderTable()">
+        <select id="filterStatus" class="filter-select" onchange="renderAll()">
           <option value="">Todos os Status</option>
           <option value="Incompleto">Incompleto (Abandono)</option>
           <option value="PIX Gerado">PIX Gerado</option>
           <option value="Tentativa de Cartão">Tentativa de Cartão</option>
         </select>
 
-        <select id="filterVersion" class="filter-select" onchange="renderTable()">
+        <select id="filterVersion" class="filter-select" onchange="renderAll()">
           <option value="">Todas as Versões</option>
           <option value="v1">Versão 1 (Principal)</option>
           <option value="v2">Versão 2 (/1 & /quiz2)</option>
         </select>
 
-        <button onclick="fetchLeads()" class="btn-refresh">🔄 Atualizar Data</button>
+        <button onclick="fetchLeads()" class="btn-refresh">🔄 Atualizar</button>
       </div>
 
-      <!-- Table -->
+      <!-- Desktop Table View -->
       <div class="table-container">
         <table>
           <thead>
             <tr>
-              <th>Data/Hora</th>
+              <th style="width: 110px;">Data/Hora</th>
               <th>Cliente</th>
-              <th>WhatsApp (1-Click)</th>
-              <th>Kit & Versão</th>
-              <th>Endereço / Cidade</th>
-              <th>Status</th>
-              <th>Ações</th>
+              <th style="width: 210px;">WhatsApp (1-Click)</th>
+              <th style="width: 160px;">Kit & Versão</th>
+              <th style="width: 170px;">Endereço / Cidade</th>
+              <th style="width: 140px;">Status</th>
+              <th style="width: 60px; text-align: center;">Ações</th>
             </tr>
           </thead>
           <tbody id="leadsTableBody">
@@ -498,6 +685,11 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Mobile Cards View -->
+      <div id="mobileCardsContainer" class="mobile-cards-container">
+        <div class="empty-state">Carregando dados dos leads...</div>
       </div>
     </main>
   </div>
@@ -533,7 +725,7 @@
           document.getElementById('app').style.display = 'flex';
           currentLeads = data.leads || [];
           updateStats();
-          renderTable();
+          renderAll();
           return true;
         }
       } catch (err) {
@@ -556,7 +748,7 @@
         if (data.ok) {
           currentLeads = data.leads || [];
           updateStats();
-          renderTable();
+          renderAll();
         }
       } catch (err) {
         console.error('Error fetching leads:', err);
@@ -600,12 +792,12 @@
       return `https://wa.me/${digits}?text=${text}`;
     }
 
-    function renderTable() {
+    function filterLeads() {
       const search = document.getElementById('searchInput').value.toLowerCase().trim();
       const statusFilter = document.getElementById('filterStatus').value;
       const versionFilter = document.getElementById('filterVersion').value;
 
-      const filtered = currentLeads.filter(l => {
+      return currentLeads.filter(l => {
         const matchesSearch = !search ||
           (l.name && l.name.toLowerCase().includes(search)) ||
           (l.email && l.email.toLowerCase().includes(search)) ||
@@ -617,11 +809,19 @@
 
         return matchesSearch && matchesStatus && matchesVersion;
       });
+    }
 
+    function renderAll() {
+      const filtered = filterLeads();
+      renderTable(filtered);
+      renderMobileCards(filtered);
+    }
+
+    function renderTable(filtered) {
       const tbody = document.getElementById('leadsTableBody');
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Nenhum lead encontrado com os filtros selecionados.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Nenhum lead encontrado.</td></tr>`;
         return;
       }
 
@@ -639,20 +839,20 @@
 
         return `
           <tr>
-            <td style="color: var(--text-muted); font-size: 13px;">${dateStr}</td>
+            <td style="color: var(--text-muted); font-size: 12px; font-weight: 500;">${dateStr}</td>
             <td>
               <span class="lead-name">${escapeHtml(l.name || 'Cliente')}</span>
-              <span class="lead-meta">${escapeHtml(l.email || '')} ${l.cpf ? '• CPF: ' + l.cpf : ''}</span>
+              <span class="lead-meta">${escapeHtml(l.email || '')} ${l.cpf ? '• CPF: ' + escapeHtml(l.cpf) : ''}</span>
             </td>
             <td>
               ${hasWa ? `
-                <a href="${waLink}" target="_blank" class="btn-wa">
-                  💬 Chamar (${formatPhoneBR(l.phone)})
+                <a href="${waLink}" target="_blank" class="btn-wa-desktop">
+                  💬 Chamar ${escapeHtml(formatPhoneBR(l.phone))}
                 </a>
-              ` : '<span style="color: var(--text-muted);">Sem telefone</span>'}
+              ` : '<span style="color: var(--text-dim); font-size: 13px;">Sem telefone</span>'}
             </td>
             <td>
-              <div style="font-weight: 600;">${escapeHtml(l.kit || '1x Quattro Spray')}</div>
+              <div style="font-weight: 700; color: #fff; font-size: 14px;">${escapeHtml(l.kit || '1x Quattro Spray')}</div>
               <span class="badge-version">${(l.version || 'v1').toUpperCase()}</span>
             </td>
             <td style="font-size: 13px; color: var(--text-muted);">
@@ -661,10 +861,63 @@
             <td>
               <span class="badge ${badgeClass}">${escapeHtml(l.status || 'Incompleto')}</span>
             </td>
-            <td>
+            <td style="text-align: center;">
               <button onclick="deleteLead('${l.id}')" class="btn-delete" title="Excluir Lead">🗑️</button>
             </td>
           </tr>
+        `;
+      }).join('');
+    }
+
+    function renderMobileCards(filtered) {
+      const container = document.getElementById('mobileCardsContainer');
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="empty-state">Nenhum lead encontrado.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(l => {
+        const dateStr = l.updatedAt ? new Date(l.updatedAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+        const waLink = buildWhatsAppLink(l);
+        const hasWa = cleanDigits(l.phone).length >= 8;
+
+        const addr = l.address || {};
+        const cityState = [addr.city, addr.state || addr.uf].filter(Boolean).join('/') || addr.street || '';
+
+        let badgeClass = 'badge-incompleto';
+        if (l.status === 'PIX Gerado') badgeClass = 'badge-pix';
+        if (l.status === 'Tentativa de Cartão' || l.status === 'Compra Concluída') badgeClass = 'badge-cartao';
+
+        return `
+          <div class="mobile-lead-card">
+            <div class="mobile-lead-header">
+              <div>
+                <div class="mobile-lead-name">${escapeHtml(l.name || 'Cliente')}</div>
+                <div class="mobile-lead-date">📅 ${dateStr}</div>
+              </div>
+              <span class="badge ${badgeClass}">${escapeHtml(l.status || 'Incompleto')}</span>
+            </div>
+
+            <div class="mobile-lead-info">
+              ${l.email ? `<div class="mobile-lead-row"><span class="mobile-lead-label">Email:</span><span class="mobile-lead-val">${escapeHtml(l.email)}</span></div>` : ''}
+              ${l.cpf ? `<div class="mobile-lead-row"><span class="mobile-lead-label">CPF:</span><span class="mobile-lead-val">${escapeHtml(l.cpf)}</span></div>` : ''}
+              <div class="mobile-lead-row">
+                <span class="mobile-lead-label">Kit / Versão:</span>
+                <span class="mobile-lead-val">${escapeHtml(l.kit || '1x Quattro Spray')} <span class="badge-version">${(l.version || 'v1').toUpperCase()}</span></span>
+              </div>
+              ${cityState ? `<div class="mobile-lead-row"><span class="mobile-lead-label">Endereço:</span><span class="mobile-lead-val">${escapeHtml(cityState)}</span></div>` : ''}
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+              ${hasWa ? `
+                <a href="${waLink}" target="_blank" class="btn-wa-mobile">
+                  💬 Chamar no WhatsApp (${escapeHtml(formatPhoneBR(l.phone))})
+                </a>
+              ` : '<div style="flex:1; text-align:center; color: var(--text-dim); font-size:13px; padding:8px;">Sem WhatsApp informado</div>'}
+              <button onclick="deleteLead('${l.id}')" class="btn-delete" style="padding: 10px 14px; background: rgba(239, 68, 68, 0.1);" title="Excluir Lead">🗑️</button>
+            </div>
+          </div>
         `;
       }).join('');
     }
