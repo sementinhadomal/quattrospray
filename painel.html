@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Remarketing — Quattro Spray</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0c10;
+      --card-bg: #141820;
+      --card-border: #232936;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary-gold: #eab308;
+      --primary-gold-hover: #ca8a04;
+      --accent-green: #22c55e;
+      --accent-blue: #3b82f6;
+      --accent-purple: #a855f7;
+      --accent-red: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Auth Screen */
+    #authModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 7, 10, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+
+    .auth-card h2 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: var(--primary-gold);
+    }
+
+    .auth-card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .auth-input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      background: #0d1117;
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+    .auth-input:focus {
+      border-color: var(--primary-gold);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: var(--primary-gold);
+      color: #000;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-submit:hover {
+      background: var(--primary-gold-hover);
+    }
+
+    /* Top Navigation */
+    header {
+      background: #0f131a;
+      border-bottom: 1px solid var(--card-border);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+      color: #000;
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-export {
+      background: #166534;
+      color: #86efac;
+      border: 1px solid #22c55e;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn-export:hover {
+      background: #22c55e;
+      color: #000;
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .btn-logout:hover {
+      color: #fff;
+      border-color: #fff;
+    }
+
+    /* Main Container */
+    main {
+      padding: 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+
+    .stat-card.total::before { background: var(--primary-gold); }
+    .stat-card.incompleto::before { background: var(--accent-red); }
+    .stat-card.pix::before { background: var(--accent-blue); }
+    .stat-card.cartao::before { background: var(--accent-green); }
+
+    .stat-title {
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    /* Controls & Filters */
+    .controls-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: #0d1117;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: var(--primary-gold);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .filter-select {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: #0d1117;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .btn-refresh {
+      background: #1e293b;
+      color: #fff;
+      border: 1px solid var(--card-border);
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .btn-refresh:hover {
+      background: #334155;
+    }
+
+    /* Table */
+    .table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow-x: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #0f131a;
+      padding: 14px 16px;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #1a202c;
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: #1a202e;
+    }
+
+    .lead-name {
+      font-weight: 700;
+      color: #fff;
+      display: block;
+    }
+    .lead-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* WhatsApp Button */
+    .btn-wa {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #25d366;
+      color: #000;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 8px 14px;
+      border-radius: 20px;
+      text-decoration: none;
+      transition: transform 0.2s;
+    }
+    .btn-wa:hover {
+      transform: scale(1.05);
+      background: #20ba5a;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .badge-incompleto { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .badge-pix { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); }
+    .badge-cartao { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
+
+    .badge-version {
+      background: #1e293b;
+      color: var(--primary-gold);
+      border: 1px solid var(--primary-gold);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .btn-delete {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 16px;
+      opacity: 0.7;
+      padding: 4px 8px;
+    }
+    .btn-delete:hover {
+      opacity: 1;
+    }
+
+    .empty-state {
+      padding: 48px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Auth Modal -->
+  <div id="authModal">
+    <div class="auth-card">
+      <h2>🔐 Acesso Restrito</h2>
+      <p>Digite a senha de administrador para acessar os leads do Quattro Spray.</p>
+      <form id="authForm" onsubmit="handleAuth(event)">
+        <input type="password" id="passwordInput" class="auth-input" placeholder="Senha do painel" required autofocus>
+        <button type="submit" class="btn-submit">Entrar no Painel</button>
+      </form>
+      <p id="authError" style="color: #ef4444; margin-top: 12px; font-size: 13px; display: none;"></p>
+    </div>
+  </div>
+
+  <!-- Dashboard App -->
+  <div id="app" style="display: none;">
+    <header>
+      <div class="brand">
+        <span class="brand-badge">QUATTRO</span>
+        <span class="brand-title">Painel de Leads & Remarketing</span>
+      </div>
+      <div class="header-actions">
+        <a id="btnDownloadCsv" href="#" onclick="downloadCsv(event)" class="btn-export">
+          📥 Baixar CSV para Remarketing
+        </a>
+        <button onclick="logout()" class="btn-logout">Sair</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card total">
+          <div class="stat-title">Total de Leads Capturados</div>
+          <div class="stat-value" id="statTotal">0</div>
+        </div>
+        <div class="stat-card incompleto">
+          <div class="stat-title">Checkout Incompleto (Abandonos)</div>
+          <div class="stat-value" id="statIncompleto">0</div>
+        </div>
+        <div class="stat-card pix">
+          <div class="stat-title">PIX Gerados</div>
+          <div class="stat-value" id="statPix">0</div>
+        </div>
+        <div class="stat-card cartao">
+          <div class="stat-title">Tentativas de Cartão</div>
+          <div class="stat-value" id="statCartao">0</div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-bar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" class="search-input" placeholder="Buscar por Nome, Email, WhatsApp ou CPF..." oninput="renderTable()">
+        </div>
+
+        <select id="filterStatus" class="filter-select" onchange="renderTable()">
+          <option value="">Todos os Status</option>
+          <option value="Incompleto">Incompleto (Abandono)</option>
+          <option value="PIX Gerado">PIX Gerado</option>
+          <option value="Tentativa de Cartão">Tentativa de Cartão</option>
+        </select>
+
+        <select id="filterVersion" class="filter-select" onchange="renderTable()">
+          <option value="">Todas as Versões</option>
+          <option value="v1">Versão 1 (Principal)</option>
+          <option value="v2">Versão 2 (/1 & /quiz2)</option>
+        </select>
+
+        <button onclick="fetchLeads()" class="btn-refresh">🔄 Atualizar Data</button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Data/Hora</th>
+              <th>Cliente</th>
+              <th>WhatsApp (1-Click)</th>
+              <th>Kit & Versão</th>
+              <th>Endereço / Cidade</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="leadsTableBody">
+            <tr>
+              <td colspan="7" class="empty-state">Carregando dados dos leads...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let currentLeads = [];
+    let adminPassword = localStorage.getItem('quattro_admin_pwd') || '';
+
+    // Auto login if pwd stored
+    if (adminPassword) {
+      testPassword(adminPassword);
+    }
+
+    async function handleAuth(e) {
+      e.preventDefault();
+      const pwd = document.getElementById('passwordInput').value.trim();
+      const ok = await testPassword(pwd);
+      if (!ok) {
+        document.getElementById('authError').innerText = 'Senha incorreta. Tente novamente.';
+        document.getElementById('authError').style.display = 'block';
+      }
+    }
+
+    async function testPassword(pwd) {
+      try {
+        const res = await fetch(`/api/leads?password=${encodeURIComponent(pwd)}`);
+        if (res.status === 401) return false;
+        const data = await res.json();
+        if (data.ok) {
+          adminPassword = pwd;
+          localStorage.setItem('quattro_admin_pwd', pwd);
+          document.getElementById('authModal').style.display = 'none';
+          document.getElementById('app').style.display = 'flex';
+          currentLeads = data.leads || [];
+          updateStats();
+          renderTable();
+          return true;
+        }
+      } catch (err) {
+        console.error('Error authenticating:', err);
+      }
+      return false;
+    }
+
+    function logout() {
+      localStorage.removeItem('quattro_admin_pwd');
+      adminPassword = '';
+      location.reload();
+    }
+
+    async function fetchLeads() {
+      if (!adminPassword) return;
+      try {
+        const res = await fetch(`/api/leads?password=${encodeURIComponent(adminPassword)}`);
+        const data = await res.json();
+        if (data.ok) {
+          currentLeads = data.leads || [];
+          updateStats();
+          renderTable();
+        }
+      } catch (err) {
+        console.error('Error fetching leads:', err);
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('statTotal').innerText = currentLeads.length;
+      document.getElementById('statIncompleto').innerText = currentLeads.filter(l => l.status === 'Incompleto').length;
+      document.getElementById('statPix').innerText = currentLeads.filter(l => l.status === 'PIX Gerado').length;
+      document.getElementById('statCartao').innerText = currentLeads.filter(l => l.status === 'Tentativa de Cartão' || l.status === 'Compra Concluída').length;
+    }
+
+    function cleanDigits(str) {
+      return str ? String(str).replace(/\D/g, '') : '';
+    }
+
+    function formatPhoneBR(phone) {
+      let digits = cleanDigits(phone);
+      if (digits.startsWith('55') && digits.length >= 12) {
+        digits = digits.substring(2);
+      }
+      if (digits.length === 11) {
+        return `(${digits.substring(0,2)}) ${digits.substring(2,7)}-${digits.substring(7)}`;
+      }
+      if (digits.length === 10) {
+        return `(${digits.substring(0,2)}) ${digits.substring(2,6)}-${digits.substring(6)}`;
+      }
+      return phone || '—';
+    }
+
+    function buildWhatsAppLink(lead) {
+      let digits = cleanDigits(lead.phone);
+      if (!digits) return '#';
+      if (!digits.startsWith('55')) {
+        digits = '55' + digits;
+      }
+      const firstName = (lead.name || 'Cliente').split(' ')[0];
+      const kitStr = lead.kit ? ` do ${lead.kit}` : '';
+      const text = encodeURIComponent(`Olá ${firstName}! Vi que você começou seu pedido${kitStr} no Quattro Spray! Ficou com alguma dúvida sobre a entrega ou pagamento? Posso te ajudar! 😊`);
+      return `https://wa.me/${digits}?text=${text}`;
+    }
+
+    function renderTable() {
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const statusFilter = document.getElementById('filterStatus').value;
+      const versionFilter = document.getElementById('filterVersion').value;
+
+      const filtered = currentLeads.filter(l => {
+        const matchesSearch = !search ||
+          (l.name && l.name.toLowerCase().includes(search)) ||
+          (l.email && l.email.toLowerCase().includes(search)) ||
+          (l.phone && l.phone.includes(search)) ||
+          (l.cpf && l.cpf.includes(search));
+
+        const matchesStatus = !statusFilter || l.status === statusFilter;
+        const matchesVersion = !versionFilter || (l.version || 'v1') === versionFilter;
+
+        return matchesSearch && matchesStatus && matchesVersion;
+      });
+
+      const tbody = document.getElementById('leadsTableBody');
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Nenhum lead encontrado com os filtros selecionados.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(l => {
+        const dateStr = l.updatedAt ? new Date(l.updatedAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+        const waLink = buildWhatsAppLink(l);
+        const hasWa = cleanDigits(l.phone).length >= 8;
+
+        const addr = l.address || {};
+        const cityState = [addr.city, addr.state || addr.uf].filter(Boolean).join('/') || addr.street || '—';
+
+        let badgeClass = 'badge-incompleto';
+        if (l.status === 'PIX Gerado') badgeClass = 'badge-pix';
+        if (l.status === 'Tentativa de Cartão' || l.status === 'Compra Concluída') badgeClass = 'badge-cartao';
+
+        return `
+          <tr>
+            <td style="color: var(--text-muted); font-size: 13px;">${dateStr}</td>
+            <td>
+              <span class="lead-name">${escapeHtml(l.name || 'Cliente')}</span>
+              <span class="lead-meta">${escapeHtml(l.email || '')} ${l.cpf ? '• CPF: ' + l.cpf : ''}</span>
+            </td>
+            <td>
+              ${hasWa ? `
+                <a href="${waLink}" target="_blank" class="btn-wa">
+                  💬 Chamar (${formatPhoneBR(l.phone)})
+                </a>
+              ` : '<span style="color: var(--text-muted);">Sem telefone</span>'}
+            </td>
+            <td>
+              <div style="font-weight: 600;">${escapeHtml(l.kit || '1x Quattro Spray')}</div>
+              <span class="badge-version">${(l.version || 'v1').toUpperCase()}</span>
+            </td>
+            <td style="font-size: 13px; color: var(--text-muted);">
+              ${escapeHtml(cityState)}
+            </td>
+            <td>
+              <span class="badge ${badgeClass}">${escapeHtml(l.status || 'Incompleto')}</span>
+            </td>
+            <td>
+              <button onclick="deleteLead('${l.id}')" class="btn-delete" title="Excluir Lead">🗑️</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    async function deleteLead(leadId) {
+      if (!confirm('Deseja realmente remover este lead?')) return;
+      try {
+        const res = await fetch('/api/leads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPassword },
+          body: JSON.stringify({ action: 'delete', leadId })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          fetchLeads();
+        }
+      } catch (err) {
+        console.error('Error deleting lead:', err);
+      }
+    }
+
+    function downloadCsv(e) {
+      e.preventDefault();
+      if (!adminPassword) return;
+      window.location.href = `/api/leads?action=export&password=${encodeURIComponent(adminPassword)}`;
+    }
+
+    // Auto-refresh every 15s
+    setInterval(fetchLeads, 15000);
+  </script>
+</body>
+</html>
