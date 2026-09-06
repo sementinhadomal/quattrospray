@@ -75,7 +75,50 @@ fbq('track', 'PageView');
   if (document.readyState==='complete') schedule(); else window.addEventListener('load', schedule, { once: true });
 })();
 </script><script defer="" src="/js/~flock.js" data-proxy-url="/~api/analytics"></script><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2140659066532768&ev=PageView&noscript=1"/></noscript>
-</head><body><!--$--><!--/$--><script type="module" src="/js/index-V6vBjwUP.js"></script>
+<style>/* Hide iOS Safari native WebKit video play button overlay */
+video::-webkit-media-controls,
+video::-webkit-media-controls-start-playback-button,
+video::-webkit-media-controls-play-button,
+video::-webkit-media-controls-panel,
+video::-webkit-media-controls-overlay-play-button,
+video::-webkit-media-controls-enclosure,
+video::-webkit-media-controls-container,
+video::-webkit-media-controls-volume-slider,
+video::-webkit-media-controls-mute-button,
+video::-webkit-media-controls-timeline,
+video::-webkit-media-controls-current-time-display,
+video::-webkit-media-controls-time-remaining-display,
+*::-webkit-media-controls,
+*::-webkit-media-controls-start-playback-button,
+*::-webkit-media-controls-play-button,
+*::-webkit-media-controls-overlay-play-button,
+*::-webkit-media-controls-panel,
+*::-webkit-media-controls-container,
+*::-webkit-media-controls-enclosure {
+  display: none !important;
+  -webkit-appearance: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  max-width: 0px !important;
+  max-height: 0px !important;
+  margin: 0px !important;
+  padding: 0px !important;
+  border: none !important;
+  position: absolute !important;
+  top: -9999px !important;
+  left: -9999px !important;
+  transform: scale(0) !important;
+}
+
+video {
+  pointer-events: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}</style></head><body><!--$--><!--/$--><script type="module" src="/js/index-V6vBjwUP.js"></script>
 <script>
 (function() {
   function forcePlay() {
