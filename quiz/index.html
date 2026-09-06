@@ -60,16 +60,25 @@ fbq('track', 'PageView');
 })();
 </script><script defer="" src="/js/~flock.js" data-proxy-url="/~api/analytics"></script><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1060761676594239&ev=PageView&noscript=1"/></noscript>
 </head><body><!--$--><!--/$--><script type="module" async="" src="/js/index-V6vBjwUP.js"></script>
+
+
 <script>
 (function() {
   function forcePlay() {
     document.querySelectorAll('video').forEach(function(v) {
       v.muted = true;
       v.defaultMuted = true;
+      v.autoplay = true;
+      v.loop = true;
       v.playsInline = true;
+      v.controls = false;
+      v.removeAttribute('controls');
       v.setAttribute('playsinline', '');
       v.setAttribute('webkit-playsinline', '');
+      v.setAttribute('disablepictureinpicture', '');
       v.style.pointerEvents = 'none';
+      v.style.userSelect = 'none';
+      v.style.outline = 'none';
       var p = v.play();
       if (p && p.catch) p.catch(function(){});
     });
@@ -77,6 +86,7 @@ fbq('track', 'PageView');
   document.addEventListener('DOMContentLoaded', forcePlay);
   window.addEventListener('load', forcePlay);
   document.addEventListener('touchstart', forcePlay, { once: true });
+  setInterval(forcePlay, 1000);
 })();
 </script>
 
