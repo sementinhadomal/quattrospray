@@ -159,19 +159,17 @@ document.addEventListener('DOMContentLoaded', function() {
       if (s) v.src = s;
     }
 
-    var isReallyPlaying = !v.paused && v.currentTime > 0 && !v.ended && v.readyState >= 2;
-    if (isReallyPlaying) {
+    var p = v.play();
+    if (p && p.then) {
+      p.then(function() {
+        v.classList.add('is-playing');
+      }).catch(function() {
+        // Fallback retry
+        v.muted = true;
+        v.play().then(function() { v.classList.add('is-playing'); }).catch(function(){});
+      });
+    } else if (!v.paused) {
       v.classList.add('is-playing');
-    } else {
-      v.classList.remove('is-playing');
-      var p = v.play();
-      if (p && p.catch) {
-        p.then(function() {
-          v.classList.add('is-playing');
-        }).catch(function() {
-          v.classList.remove('is-playing');
-        });
-      }
     }
   }
 
@@ -207,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener(gestureEvts[k], handleAllVideos, { passive: true, capture: true });
   }
 
-  setInterval(handleAllVideos, 250);
+  setInterval(handleAllVideos, 200);
 
   try {
     var obs = new MutationObserver(function() { handleAllVideos(); });
