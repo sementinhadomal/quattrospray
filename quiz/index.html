@@ -59,9 +59,7 @@ fbq('track', 'PageView');
   if (document.readyState==='complete') schedule(); else window.addEventListener('load', schedule, { once: true });
 })();
 </script><script defer="" src="/js/~flock.js" data-proxy-url="/~api/analytics"></script><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1060761676594239&ev=PageView&noscript=1"/></noscript>
-<style>
-
-/* Hide all WebKit/iOS Safari native video play buttons & overlays */
+<style>/* Hide all WebKit/iOS Safari native video play buttons & overlays */
 video::-webkit-media-controls,
 video::-webkit-media-controls-start-playback-button,
 video::-webkit-media-controls-play-button,
@@ -104,9 +102,18 @@ video {
   -webkit-touch-callout: none !important;
   -webkit-user-select: none !important;
   user-select: none !important;
+  transition: opacity 0.3s ease-in-out !important;
 }
 
-</style>
+video:not(.is-playing) {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+video.is-playing {
+  opacity: 1 !important;
+  visibility: visible !important;
+}</style>
 </head><body><!--$--><!--/$--><script type="module" async="" src="/js/index-V6vBjwUP.js"></script>
 
 
@@ -114,46 +121,83 @@ video {
 
 <script>
 (function() {
-  function hideControlsAndPlay(v) {
-    try {
-      v.muted = true;
-      v.defaultMuted = true;
-      v.autoplay = true;
-      v.loop = true;
-      v.playsInline = true;
-      v.controls = false;
-      v.removeAttribute('controls');
-      v.setAttribute('playsinline', '');
-      v.setAttribute('webkit-playsinline', '');
-      v.setAttribute('disablepictureinpicture', '');
-      v.setAttribute('disableremoteplayback', '');
-      v.setAttribute('x5-video-player-type', 'h5');
-      v.style.pointerEvents = 'none';
-      v.style.userSelect = 'none';
-      v.style.webkitUserSelect = 'none';
-      v.style.outline = 'none';
+  function checkAndPlay(v) {
+    if (!v) return;
+    v.muted = true;
+    v.defaultMuted = true;
+    v.volume = 0;
+    v.autoplay = true;
+    v.loop = true;
+    v.playsInline = true;
+    v.controls = false;
+    v.removeAttribute('controls');
+    v.setAttribute('muted', '');
+    v.setAttribute('playsinline', '');
+    v.setAttribute('webkit-playsinline', '');
+    v.setAttribute('disablepictureinpicture', '');
+    v.setAttribute('disableremoteplayback', '');
+    v.setAttribute('x5-video-player-type', 'h5');
+    v.style.pointerEvents = 'none';
 
-      var promise = v.play();
-      if (promise !== undefined && promise.catch) {
-        promise.catch(function() {
-          v.muted = true;
-          var p2 = v.play();
-          if (p2 && p2.catch) p2.catch(function(){});
+    if (!v.src && v.querySelector('source')) {
+      var s = v.querySelector('source').getAttribute('src');
+      if (s) v.src = s;
+    }
+
+    var isReallyPlaying = !v.paused && v.currentTime > 0 && !v.ended && v.readyState >= 2;
+    if (isReallyPlaying) {
+      v.classList.add('is-playing');
+    } else {
+      v.classList.remove('is-playing');
+      var p = v.play();
+      if (p && p.catch) {
+        p.then(function() {
+          v.classList.add('is-playing');
+        }).catch(function() {
+          v.classList.remove('is-playing');
         });
       }
-    } catch(e) {}
+    }
   }
 
-  function forcePlayAll() {
-    document.querySelectorAll('video').forEach(hideControlsAndPlay);
+  function handleAllVideos() {
+    var videos = document.querySelectorAll('video');
+    for (var i = 0; i < videos.length; i++) {
+      var v = videos[i];
+      checkAndPlay(v);
+      if (!v._hasFixListeners) {
+        v._hasFixListeners = true;
+        var events = ['loadedmetadata', 'canplay', 'canplaythrough', 'playing', 'timeupdate', 'stalled', 'suspend', 'pause', 'ended', 'waiting'];
+        for (var j = 0; j < events.length; j++) {
+          v.addEventListener(events[j], function() {
+            checkAndPlay(this);
+          }, { passive: true });
+        }
+      }
+    }
   }
 
-  document.addEventListener('DOMContentLoaded', forcePlayAll);
-  window.addEventListener('load', forcePlayAll);
-  document.addEventListener('touchstart', forcePlayAll, { passive: true });
-  document.addEventListener('touchend', forcePlayAll, { passive: true });
-  document.addEventListener('scroll', forcePlayAll, { passive: true });
-  setInterval(forcePlayAll, 500);
+  handleAllVideos();
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', handleAllVideos);
+  } else {
+    handleAllVideos();
+  }
+  window.addEventListener('load', handleAllVideos);
+
+  var gestureEvts = ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'mousedown', 'click', 'scroll', 'touchmove'];
+  for (var k = 0; k < gestureEvts.length; k++) {
+    window.addEventListener(gestureEvts[k], handleAllVideos, { passive: true, capture: true });
+    document.addEventListener(gestureEvts[k], handleAllVideos, { passive: true, capture: true });
+  }
+
+  setInterval(handleAllVideos, 250);
+
+  try {
+    var obs = new MutationObserver(function() { handleAllVideos(); });
+    obs.observe(document.documentElement, { childList: true, subtree: true });
+  } catch(e) {}
 })();
 </script>
 
