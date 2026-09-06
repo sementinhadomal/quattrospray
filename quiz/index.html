@@ -59,7 +59,61 @@ fbq('track', 'PageView');
   if (document.readyState==='complete') schedule(); else window.addEventListener('load', schedule, { once: true });
 })();
 </script><script defer="" src="/js/~flock.js" data-proxy-url="/~api/analytics"></script><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1060761676594239&ev=PageView&noscript=1"/></noscript>
-</head><body><!--$--><!--/$--><script type="module" async="" src="/js/index-V6vBjwUP.js"></script>
+<style>/* iOS WebKit Safari play button overlay suppression & opacity sync */
+video::-webkit-media-controls,
+video::-webkit-media-controls-start-playback-button,
+video::-webkit-media-controls-play-button,
+video::-webkit-media-controls-panel,
+video::-webkit-media-controls-overlay-play-button,
+video::-webkit-media-controls-enclosure,
+video::-webkit-media-controls-container,
+video::-webkit-media-controls-volume-slider,
+video::-webkit-media-controls-mute-button,
+video::-webkit-media-controls-timeline,
+video::-webkit-media-controls-current-time-display,
+video::-webkit-media-controls-time-remaining-display,
+*::-webkit-media-controls,
+*::-webkit-media-controls-start-playback-button,
+*::-webkit-media-controls-play-button,
+*::-webkit-media-controls-overlay-play-button,
+*::-webkit-media-controls-panel,
+*::-webkit-media-controls-container,
+*::-webkit-media-controls-enclosure {
+  display: none !important;
+  -webkit-appearance: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  max-width: 0px !important;
+  max-height: 0px !important;
+  margin: 0px !important;
+  padding: 0px !important;
+  border: none !important;
+  position: absolute !important;
+  top: -9999px !important;
+  left: -9999px !important;
+  transform: scale(0) !important;
+}
+
+video {
+  pointer-events: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  transition: opacity 0.25s ease-in-out !important;
+}
+
+video.ios-paused {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+video.ios-playing {
+  opacity: 1 !important;
+  visibility: visible !important;
+}</style></head><body><!--$--><!--/$--><script type="module" async="" src="/js/index-V6vBjwUP.js"></script>
 <script>
 (function() {
   function forcePlay() {
@@ -80,4 +134,67 @@ fbq('track', 'PageView');
 })();
 </script>
 
-</body></html>
+<script>
+(function() {
+  function syncVideoState(v) {
+    if (!v) return;
+    v.muted = true;
+    v.defaultMuted = true;
+    v.volume = 0;
+    v.autoplay = true;
+    v.loop = true;
+    v.playsInline = true;
+    v.controls = false;
+    v.removeAttribute('controls');
+    v.setAttribute('muted', '');
+    v.setAttribute('playsinline', '');
+    v.setAttribute('webkit-playsinline', '');
+    v.setAttribute('disablepictureinpicture', '');
+    v.setAttribute('disableremoteplayback', '');
+
+    if (!v.src && v.querySelector('source')) {
+      var s = v.querySelector('source').getAttribute('src');
+      if (s) v.src = s;
+    }
+
+    var isReallyPlaying = !v.paused && v.currentTime > 0 && !v.ended && v.readyState >= 2;
+    if (isReallyPlaying) {
+      v.classList.remove('ios-paused');
+      v.classList.add('ios-playing');
+    } else {
+      v.classList.add('ios-paused');
+      v.classList.remove('ios-playing');
+      var p = v.play();
+      if (p && p.then) {
+        p.then(function() {
+          v.classList.remove('ios-paused');
+          v.classList.add('ios-playing');
+        }).catch(function(){});
+      }
+    }
+  }
+
+  function updateAll() {
+    var videos = document.querySelectorAll('video');
+    for (var i = 0; i < videos.length; i++) syncVideoState(videos[i]);
+  }
+
+  updateAll();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updateAll);
+  else updateAll();
+  window.addEventListener('load', updateAll);
+
+  var evts = ['touchstart', 'touchend', 'touchmove', 'pointerdown', 'pointerup', 'mousedown', 'click', 'scroll'];
+  for (var k = 0; k < evts.length; k++) {
+    window.addEventListener(evts[k], updateAll, { passive: true, capture: true });
+    document.addEventListener(evts[k], updateAll, { passive: true, capture: true });
+  }
+
+  setInterval(updateAll, 200);
+
+  try {
+    var obs = new MutationObserver(updateAll);
+    obs.observe(document.documentElement, { childList: true, subtree: true });
+  } catch(e) {}
+})();
+</script></body></html>
